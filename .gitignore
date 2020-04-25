@@ -1,1 +1,24 @@
+
+# Created by https://www.gitignore.io/api/code,erlang
+# Edit at https://www.gitignore.io/?templates=code,erlang
+
+### Code ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### Erlang ###
+.eunit
+deps
+*.o
 *.beam
+*.plt
+erl_crash.dump
+ebin/*.beam
+rel/example_project
+.concrete/DEV_MODE
+.rebar
+
+# End of https://www.gitignore.io/api/code,erlang
