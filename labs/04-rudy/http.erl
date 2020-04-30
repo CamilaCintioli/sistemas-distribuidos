@@ -32,7 +32,13 @@ request_line([$G, $E, $T, 32 |R0]) ->
     {URI, R1} = request_uri(R0),
     {Ver, R2} = http_version(R1),
     [13,10|R3] = R2,
-    {{get, URI, Ver}, R3}.
+    {{get, URI, Ver}, R3};
+request_line([$P,$O,$S,$T,32|R0]) ->
+    {URI, R1} = request_uri(R0),
+    {Ver, R2} = http_version(R1),
+    [13,10|R3] = R2,
+    {{post, URI, Ver}, R3}.
+
 
 parse_request(R0) ->
     {Request, R1} = request_line(R0),

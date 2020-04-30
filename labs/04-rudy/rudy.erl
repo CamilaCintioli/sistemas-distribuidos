@@ -49,7 +49,8 @@ request(Client) ->
 
 %que responde
 reply({{get, URI, _}, _, Body}) ->
-    http:ok(Body).
+    http:ok(Body);
+reply({{post,URI,_},_,Body}) -> http:ok(Body).
 
 % ///---------------------------------------------------------
 
