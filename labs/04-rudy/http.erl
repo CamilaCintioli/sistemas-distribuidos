@@ -1,5 +1,5 @@
 -module(http).
--export([parse_request/1, ok/1, get/1]).
+-export([parse_request/1, ok/1, get/1, internal_server_error/1]).
 
 message_body(R) ->
     {R, []}.
@@ -51,3 +51,12 @@ ok(Body) ->
 
 get(URI) ->
     "GET " ++ URI ++ " HTTP/1.1\r\n" ++ "\r\n".
+
+internal_server_error(Body) ->
+    "HTTP/1.1 500 Internal Server Error\r\n" ++ "\r\n" ++ Body.
+
+% Para lograr eso
+% necesitaremos parsear la URI y serparar el path y el nombre de archivo
+% de un posible query o índice. Una vez que tengamos el nombre de archivo
+% a mano, necesitamos construir una header de respuesta apropiado
+% conteniendo el tamaño, tipo y condiciones de encoding.

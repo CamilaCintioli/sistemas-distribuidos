@@ -30,7 +30,8 @@ handler(Listen) ->
         {error, Error} ->
           io:format("handler: error: ~w~n", [Error]),
           error
-    end.
+    end,
+handler(Listen).
 
 %lee el req y la parsea. pasa la request al reply/1. envia la respuesta al cliente.
 request(Client) ->
@@ -38,9 +39,11 @@ request(Client) ->
     case Recv of
         {ok, Str} ->
             %Area de trabajo:
-            Request = http:parse_request(Str),
-            Response = reply(Request),
-            gen_tcp:send(Client, Response);
+            try http:parse_request(Str) of
+                Request -> gen_tcp:send(Client, reply(Request))
+            catch
+                _:_  -> gen_tcp:send(Client, internal_server_error("Algo salio mal"))
+            end;
         {error, Error} ->
             io:format("request: error: ~w~n", [Error]),
             error
@@ -51,6 +54,9 @@ request(Client) ->
 reply({{get, URI, _}, _, Body}) ->
     http:ok(Body);
 reply({{post,URI,_},_,Body}) -> http:ok(Body).
+
+internal_server_error(Body) ->
+    http:internal_server_error(Body).
 
 % ///---------------------------------------------------------
 
