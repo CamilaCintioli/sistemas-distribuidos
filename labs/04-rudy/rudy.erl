@@ -1,7 +1,5 @@
 -module(rudy).
 -export([init/1]).
--import(gen_tcp,[listen/2, accept/1, close/1, recv/2]).
--import(http, [ok/1, parse_request/1]).
 
 %toma un puerto, abre un socket en modo escucha y pasa el socket a handler/1.
 %Cuando el request termina, el socket se cierra.
