@@ -23,7 +23,8 @@ handler(Listen) ->
     case gen_tcp:accept(Listen) of
         {ok, Client} ->
             %area de trabajo
-            request(Client),
+            spawn(rudy, request, [Client]),
+            %request(Client),
             ok;
         {error, Error} ->
           io:format("handler: error: ~w~n", [Error]),
