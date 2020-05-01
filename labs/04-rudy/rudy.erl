@@ -55,33 +55,3 @@ reply({{post,URI,_},_,Body}) -> http:ok(Body).
 
 internal_server_error(Body) ->
     http:internal_server_error(Body).
-
-% ///---------------------------------------------------------
-
-% gen_tcp:listen(Port, Option): así es como el server abre un socket
-% en modo escucha. Pasamos el numero de puerto como argumento y usamos
-% la siguiente lista de opciones:
-% [{active, false}, {reuseaddr, true}]. Al usar estas opciones
-% veremos los bytes como una lista de enteros en lugar de una
-% estructura binaria. Tendremos que leer la entrada usando recv/2 en
-% lugar de enviárnosla como mensajes. La dirección del puerto deberá
-% ser usada una y otra vez.
-
-
-% gen_tcp:accept(Listen): Así es como aceptamos un request de
-% entrada. Si es exitoso, tendremos un canal de comunicación abierto
-% con el cliente.
-
-
-% gen_tcp:recv(Client, 0): Una vez que tengamos conexión con el
-% cliente leeremos la entrada y la retornaremos como un string. El
-% argumento 0, dice al sistema que lea todo lo posible.
-
-
-% gen_tcp:send(Client, Reply): Así es como devolvemos la respuesta,
-% en forma de string, al cliente.
-
-
-% gen_tcp:close(Socket): Una vez que terminamos, necesitamos cerrar
-% la conexión. Notar también que necesitamos cerrar el socket de
-% escucha que abrimos al principio.
