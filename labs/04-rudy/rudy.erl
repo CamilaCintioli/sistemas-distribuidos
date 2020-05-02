@@ -1,5 +1,5 @@
 -module(rudy).
--export([init/1]).
+-export([init/1, request/1]).
 
 %toma un puerto, abre un socket en modo escucha y pasa el socket a handler/1.
 %Cuando el request termina, el socket se cierra.
@@ -8,12 +8,10 @@ init(Port) ->
     case gen_tcp:listen(Port, Opt) of
         {ok, Listen} ->
             %Area de trabajo:
-          io:format("init: listen: ~w~n", [Listen]),
             handler(Listen),
             gen_tcp:close(Listen),
             ok;
     {error, Error} ->
-      io:format("init: error: ~w~n", [Error]),
         error
     end.
 
@@ -27,7 +25,6 @@ handler(Listen) ->
             %request(Client),
             ok;
         {error, Error} ->
-          io:format("handler: error: ~w~n", [Error]),
           error
     end,
 handler(Listen).
@@ -44,7 +41,6 @@ request(Client) ->
                 _:_  -> gen_tcp:send(Client, http:internal_server_error("Algo salio mal"))
             end;
         {error, Error} ->
-            io:format("request: error: ~w~n", [Error]),
             error
     end,
     gen_tcp:close(Client).
