@@ -1,5 +1,5 @@
 -module(http).
--export([parse_request/1, ok/1, get/1, internal_server_error/1]).
+-export([parse_request/1, ok/1, get/1, internal_server_error/1, not_found/1]).
 
 message_body(R) ->
     {R, []}.
@@ -54,6 +54,9 @@ get(URI) ->
 
 internal_server_error(Body) ->
     "HTTP/1.1 500 Internal Server Error\r\n" ++ "\r\n" ++ Body.
+
+not_found(Body) ->
+    "HTTP/1.1 404 Not Found\r\n" ++ "\r\n" ++ Body.
 
 % Para lograr eso
 % necesitaremos parsear la URI y serparar el path y el nombre de archivo

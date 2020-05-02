@@ -41,7 +41,7 @@ request(Client) ->
             try http:parse_request(Str) of
                 Request -> gen_tcp:send(Client, reply(Request))
             catch
-                _:_  -> gen_tcp:send(Client, internal_server_error("Algo salio mal"))
+                _:_  -> gen_tcp:send(Client, http:internal_server_error("Algo salio mal"))
             end;
         {error, Error} ->
             io:format("request: error: ~w~n", [Error]),
@@ -51,12 +51,10 @@ request(Client) ->
 
 %que responde
 reply({{get, URI, _}, _, Body}) ->
-    case file:read_file("." ++ URI) of
+    case file:read_file("./public" ++ URI) of
         {ok, Binary} -> http:ok(Binary);
-        %{error, enoent} -> http:not_found();
-        {error, _} -> internal_server_error("se rompio")
+        {error, enoent} -> http:not_found("no encontrado");
+        {error, _} -> http:internal_server_error("se rompio")
     end;
 reply({{post,URI,_},_,Body}) -> http:ok(Body).
 
-internal_server_error(Body) ->
-    http:internal_server_error(Body).
