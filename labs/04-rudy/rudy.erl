@@ -51,7 +51,11 @@ request(Client) ->
 
 %que responde
 reply({{get, URI, _}, _, Body}) ->
-    http:ok(Body);
+    case file:read_file("." ++ URI) of
+        {ok, Binary} -> http:ok(Binary);
+        %{error, enoent} -> http:not_found();
+        {error, _} -> internal_server_error("se rompio")
+    end;
 reply({{post,URI,_},_,Body}) -> http:ok(Body).
 
 internal_server_error(Body) ->
