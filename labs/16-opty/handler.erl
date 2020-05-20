@@ -13,20 +13,21 @@ handler(Client, Validator, Store, Reads, Writes) ->
         {read, Ref, N} ->
             case lists:keysearch(N, 1, Writes) of
                 {value, {N, _, Value}} ->
-                      %completar
+                      Client ! {Ref, Value},
                     handler(Client, Validator, Store, Reads, Writes);
                 false ->
-                      %completar
-                      %completar
+                      Pid = store:lookup(N, Store),
+                      Pid ! {read, Ref, self()},
                     handler(Client, Validator, Store, Reads, Writes)
             end;
         {Ref, Entry, Value, Time} ->
-              %completar
-            handler(Client, Validator, Store, [...|Reads], Writes);
+              Client ! {Ref,Value},
+            handler(Client, Validator, Store, [{Entry,Time}|Reads], Writes);
         {write, N, Value} ->
-            Added = [{N, ..., ...}|...],
+            Entry = store:lookup(N, Store),
+            Added = [{N, Entry, Value}|Writes],
             handler(Client, Validator, Store, Reads, Added);
         {commit, Ref} ->
             Validator ! {validate, Ref, Reads, Writes, Client};
         abort -> ok
-    end 
+    end. 

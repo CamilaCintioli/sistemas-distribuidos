@@ -37,3 +37,9 @@ check_reads(N, Tag) ->
 	     {Tag, abort} -> abort
 	   end
     end.
+
+update(Writes) -> 
+  lists:map(fun({_,Entry,Value}) -> 
+    Entry ! {write,Value}
+  end,
+  Writes).

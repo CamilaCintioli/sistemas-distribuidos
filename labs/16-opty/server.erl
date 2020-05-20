@@ -18,8 +18,10 @@ open(Server) ->
 server(Validator, Store) ->
         receive
             {open, Client} ->
-                 %completar
+                Client ! {transaction, Validator, Store},
                 server(Validator, Store);
             stop ->
                  store:stop(Store)
         end.
+
+stop(Server) -> Server ! stop.
