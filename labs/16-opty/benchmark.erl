@@ -5,10 +5,13 @@
 start(StoreSize, ClientCount, ReadCount, WriteCount) ->
     Server = server:start(StoreSize),
     Reporter = self(),
+    {_,_,StartedAt} = os:timestamp(),
     Clients = init_clients(ClientCount, Reporter, Server, ReadCount, WriteCount, StoreSize),
     Reports = reports(Clients),
+    {_,_,EndedAt} = os:timestamp(),
     io:format(format_reports(Reports)),
-    io:format(format_report_aggregations(Reports)).
+    io:format(format_report_aggregations(Reports)),
+    io:format(format_duration(StartedAt, EndedAt)).
 
 format_reports([]) -> "~n";
 format_reports([{_, Time, ok} | Reports]) -> "Time: " ++ integer_to_list(Time) ++ " microseconds - Result: Ok~n" ++ format_reports(Reports);
@@ -20,13 +23,20 @@ format_report_aggregations(Reports) ->
 
 report_aggregations([]) -> {0, 0, 0, 0, 0, 0, 0};
 report_aggregations([{_, Time, ok} | Reports]) -> case report_aggregations(Reports) of 
+{MaxTimeOk, 0, MaxTimeAbort, MinTimeAbort, TotalOk, TotalAbort, Total} ->
+    {max(Time, MaxTimeOk), Time, MaxTimeAbort, MinTimeAbort, TotalOk + 1, TotalAbort, Total + 1};
 {MaxTimeOk, MinTimeOk, MaxTimeAbort, MinTimeAbort, TotalOk, TotalAbort, Total} ->
     {max(Time, MaxTimeOk), min(Time, MinTimeOk), MaxTimeAbort, MinTimeAbort, TotalOk + 1, TotalAbort, Total + 1}
 end;
 report_aggregations([{_, Time, abort} | Reports]) -> case report_aggregations(Reports) of 
+{MaxTimeOk, MinTimeOk, MaxTimeAbort, 0, TotalOk, TotalAbort, Total} ->
+    {MaxTimeOk, MinTimeOk, max(Time, MaxTimeAbort), Time, TotalOk, TotalAbort + 1, Total + 1};
 {MaxTimeOk, MinTimeOk, MaxTimeAbort, MinTimeAbort, TotalOk, TotalAbort, Total} ->
     {MaxTimeOk, MinTimeOk, max(Time, MaxTimeAbort), min(Time,MinTimeAbort), TotalOk, TotalAbort + 1, Total + 1}
 end.
+
+format_duration(StartedAt, EndedAt) ->
+    "Benchmark duration: " ++ integer_to_list(EndedAt - StartedAt) ++ " microseconds~n".
 
 reports([]) -> [];
 reports([_Client|Clients]) ->
