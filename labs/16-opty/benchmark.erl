@@ -10,15 +10,16 @@ start(StoreSize, ClientCount, ReadCount, WriteCount) ->
     Reports = reports(Clients),
     {_,_,EndedAt} = os:timestamp(),
     io:format(format_reports(Reports)),
-    io:format(format_report_aggregations(Reports)),
-    io:format(format_duration(StartedAt, EndedAt)).
+    Aggregations = report_aggregations(Reports),
+    io:format(format_report_aggregations(Aggregations)),
+    io:format(format_duration(StartedAt, EndedAt)),
+    io:format(format_averages_transaction_per_second(Aggregations, StartedAt, EndedAt)).
 
 format_reports([]) -> "~n";
 format_reports([{_, Time, ok} | Reports]) -> "Time: " ++ integer_to_list(Time) ++ " microseconds - Result: Ok~n" ++ format_reports(Reports);
 format_reports([{_, Time, abort} | Reports]) -> "Time: " ++ integer_to_list(Time) ++ " microseconds - Result: Aborted~n" ++ format_reports(Reports).
 
-format_report_aggregations(Reports) ->
-    {MaxTimeOk, MinTimeOk, MaxTimeAbort, MinTimeAbort, TotalOk, TotalAbort, Total} = report_aggregations(Reports),
+format_report_aggregations({MaxTimeOk, MinTimeOk, MaxTimeAbort, MinTimeAbort, TotalOk, TotalAbort, Total}) ->
     "MaxTimeOk: " ++ integer_to_list(MaxTimeOk) ++ " - MinTimeOk: " ++ integer_to_list(MinTimeOk) ++ "~nMaxTimeAbort: " ++ integer_to_list(MaxTimeAbort) ++ " - MinTimeAbort: " ++ integer_to_list(MinTimeAbort) ++ "~nTotalOk: " ++ integer_to_list(TotalOk) ++ " - TotalAbort: " ++ integer_to_list(TotalAbort) ++ " - Total: " ++ integer_to_list(Total) ++ "~n".
 
 report_aggregations([]) -> {0, 0, 0, 0, 0, 0, 0};
@@ -37,6 +38,10 @@ end.
 
 format_duration(StartedAt, EndedAt) ->
     "Benchmark duration: " ++ integer_to_list(EndedAt - StartedAt) ++ " microseconds~n".
+
+format_averages_transaction_per_second({_, _, _, _, _, _, Total}, StartedAt, EndedAt) ->
+    Duration = EndedAt - StartedAt,
+    "Average transactions per second: " ++ float_to_list((Total / Duration) * 1000 * 1000) ++ "~n".
 
 reports([]) -> [];
 reports([_Client|Clients]) ->
