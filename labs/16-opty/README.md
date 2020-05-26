@@ -55,9 +55,26 @@ update(Writes) ->
 ## Performance
 
 ### Client
+Implementamos un client como es recomendado para realizar unos tests. El cliente puede recibir los mensajes:
+- ```{read, N} ```  
+- ```{write, N, Value}```
+- ```commit```
+- ```abort```
 
-Hicimos un client como es recomendado para realizar unos tests. El cliente puede recibir los mensajes:
-- {read, N} 
-- {write, N, Value}
-- commit
-- abort
+### Benchmark
+Para realizar pruebas de carga implementamos un benchmark. El start del benchmark recibe el tamaño del store, una cantidad de clientes a iniciar, la cantidad de lecturas y escrituras que cada cliente deber realizar antes de commitear sus operaciones.  
+
+```benchmark:start(StoreSize, ClientCount, ReadCount, WriteCount)```
+
+Cada cliente inicializado realizará las escrituras y lecturas en un orden aleatorio en una posición aleatoria del store y hará un commit. Con los datos provistos por el benchmark pudimos llegar a varias conclusiones.  
+
+La manera en que el servidor performa es variante y el tiempo en responder suele aumentar con una mayor cantidad de clientes. Realizamos pruebas con 1000 transacciones donde el tiempo de respusta máximo fue 0,333227 segundos, mientras que pruebas con 5000 transacciones el tiempo de respuesta aumentaba a  13 segundos aproximadamente.  
+
+En cuanto a la tasa de éxito de las transacciones, es muy dependiente del tamaño del store y las operaciones de lectura y escritura que son realizadas. Una de las pruebas que realizamos fue con un tamaño de 5000 en el store y 100 clientes, haciendo 50 lecturas y escrituras tuvimos 84 commits realizados exitosamente y 16 abortados pero realizando la misma prueba con un store de 50, 91 commits fueron abortados.  
+
+La implementación del store que tenemos no es realista porque se utiliza un mismo proceso validator para validar todos los commits realizados por los clientes, provocando un aumento en el tiempo de respuesta a medida que hayan más clientes.   
+Un pro de la estrategia usada para la implementación es que una vez que el cliente commitea, el handler muere junto al cliente.  
+Como ya mencionamos previamente, una de las desventajas que encontramos fue la de tener un solo validator y también que no hay ningún tipo de control en cuántos handlers son inicializados y por quién,ya que se pueden levantar N handlers y todos por un mismo cliente.  
+Notamos además que no hay ningúna validación en el número de entrada a leer/escribir en el store por un cliente. Esto podría agregarse fácilmente y/o notificar al cliente con el tamaño del store al iniciar un handler.
+
+
