@@ -5,15 +5,13 @@
 start(StoreSize, ClientCount, ReadCount, WriteCount) ->
     Server = server:start(StoreSize),
     Reporter = self(),
-    {_,_,StartedAt} = os:timestamp(),
-    Clients = init_clients(ClientCount, Reporter, Server, ReadCount, WriteCount, StoreSize),
-    Reports = reports(Clients),
-    {_,_,EndedAt} = os:timestamp(),
+    {Time, Reports} = timer:tc(fun() -> 
+        Clients = init_clients(ClientCount, Reporter, Server, ReadCount, WriteCount, StoreSize), reports(Clients) end),
     io:format(format_reports(Reports)),
     Aggregations = report_aggregations(Reports),
     io:format(format_report_aggregations(Aggregations)),
-    io:format(format_duration(StartedAt, EndedAt)),
-    io:format(format_averages_transaction_per_second(Aggregations, StartedAt, EndedAt)).
+    io:format(format_duration(Time)),
+    io:format(format_averages_transaction_per_second(Aggregations, Time)).
 
 format_reports([]) -> "~n";
 format_reports([{_, Time, ok} | Reports]) -> "Time: " ++ integer_to_list(Time) ++ " microseconds - Result: Ok~n" ++ format_reports(Reports);
@@ -36,12 +34,11 @@ report_aggregations([{_, Time, abort} | Reports]) -> case report_aggregations(Re
     {MaxTimeOk, MinTimeOk, max(Time, MaxTimeAbort), min(Time,MinTimeAbort), TotalOk, TotalAbort + 1, Total + 1}
 end.
 
-format_duration(StartedAt, EndedAt) ->
-    "Benchmark duration: " ++ integer_to_list(EndedAt - StartedAt) ++ " microseconds~n".
+format_duration(Time) ->
+    "Benchmark duration: " ++ integer_to_list(Time) ++ " microseconds~n".
 
-format_averages_transaction_per_second({_, _, _, _, _, _, Total}, StartedAt, EndedAt) ->
-    Duration = EndedAt - StartedAt,
-    "Average transactions per second: " ++ float_to_list((Total / Duration) * 1000 * 1000) ++ "~n".
+format_averages_transaction_per_second({_, _, _, _, _, _, Total}, Time) ->
+    "Average transactions per second: " ++ integer_to_list(trunc((Total / Time) * 1000 * 1000)) ++ "~n".
 
 reports([]) -> [];
 reports([_Client|Clients]) ->
