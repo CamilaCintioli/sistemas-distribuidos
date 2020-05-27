@@ -16,7 +16,7 @@ loop(Clock, Queue) ->
     receive
         {log, From, Time, Msg} ->
             % encolar mensaje
-            Queue2 = pqueue:queue(Time, {From, Time, Msg}, Queue)
+            Queue2 = pqueue:in(Time, {From, Time, Msg}, Queue),
 
             % updatear clock
             Clock2 = time:update(From, Time, Clock),
@@ -34,15 +34,15 @@ loop(Clock, Queue) ->
     end.
 
 log_up_to(Time, Queue) ->
-    {LowerQueue, UpperQueue} = pqueue:split(Time, Queue)
+    {LowerQueue, UpperQueue} = pqueue:split(Time, Queue),
     log_queue(LowerQueue),
     UpperQueue.
 
 log_queue(Queue) ->
-    case pqueue:is_empty(Queue) ->
+    case pqueue:is_empty(Queue) of
         true -> ok;
         false ->
-            {{From, Time, Msg}, Queue2} = pqueue:dequeue(Queue),
+            {{From, Time, Msg}, Queue2} = pqueue:out(Queue),
             log(From, Time, Msg),
             log_queue(Queue2)
     end.
