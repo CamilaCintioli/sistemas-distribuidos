@@ -36,15 +36,22 @@ is_empty(PQueue) ->
     ).
 
 out(PQueue) ->
-    % buscar la key con una queue no vacia mas baja
-    {LowestPriority, LowestQueue, PQueue2} = split_lowest_priority(PQueue),
-    % hacer queue out de esta cola
-    {{value, Item}, LowestQueue2} = queue:out(LowestQueue),
-    case queue:is_empty(LowestQueue2) of
-        % eliminar la queue si esta vacia
-        true -> {Item, PQueue2};
-        % retornar el elemento y la pqueue
-        false -> {Item, dict:append(LowestPriority, LowestQueue2, PQueue2)}
+    IsEmptyParam = is_empty(PQueue),
+    if IsEmptyParam -> {empty, PQueue};
+       true ->
+	   % buscar la key con una queue no vacia mas baja
+	   {LowestPriority, LowestQueue, PQueue2} =
+	       split_lowest_priority(PQueue),
+	   % hacer queue out de esta cola
+	   {Result, LowestQueue2} = queue:out(LowestQueue),
+	   % eliminar la queue si esta vacia
+	   IsEmpty = queue:is_empty(LowestQueue2),
+	   if IsEmpty -> {Result, PQueue2};
+	      % retornar el elemento y la pqueue
+	      true ->
+		  {Result,
+		   dict:append(LowestPriority, LowestQueue2, PQueue2)}
+	   end
     end.
 
 split_lowest_priority(PQueue) ->

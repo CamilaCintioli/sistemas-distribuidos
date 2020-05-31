@@ -39,12 +39,10 @@ log_up_to(Time, Queue) ->
     UpperQueue.
 
 log_queue(Queue) ->
-    case pqueue:is_empty(Queue) of
-        true -> ok;
-        false ->
-            {{From, Time, Msg}, Queue2} = pqueue:out(Queue),
-            log(From, Time, Msg),
-            log_queue(Queue2)
+    case pqueue:out(Queue) of
+        {{value, {From, Time, Msg}}, Queue2} ->
+            [log(From, Time, Msg) | log_queue(Queue2)];
+        {empty, _} -> []
     end.
 
 log(From, Time, Msg) ->
