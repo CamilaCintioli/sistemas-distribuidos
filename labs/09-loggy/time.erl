@@ -24,6 +24,6 @@ update(Node, Time, Clock) ->
 % retorna si es seguro enviar el mensaje de log de un evento que ocurrió en el tiempo Time dado.
 safe(Time, Clock) ->
     lists:all(
-    fun ({ _, Time2 }) -> Time2 > Time end,
+    fun ({ _, Time2 }) -> Time2 >= Time end,
     Clock).
 
