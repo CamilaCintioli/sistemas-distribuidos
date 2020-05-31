@@ -3,6 +3,7 @@
 
 run() ->
     test_out_on_single_element_pqueue_returns_it_and_an_empty_pqueue(),
+    test_out_returns_the_ones_with_same_priority_in_order(),
     test_out_returns_the_one_with_lowest_priority().
 
 test_out_on_single_element_pqueue_returns_it_and_an_empty_pqueue() ->
@@ -26,3 +27,25 @@ test_out_returns_the_one_with_lowest_priority() ->
     ExpectedEmpty2 = true,
     ExpectedEmpty2 = pqueue:is_empty(PQueue5).
 
+test_out_returns_the_ones_with_same_priority_in_order() ->
+    FirstValue = first,
+    SecondValue = second,
+    ThirdValue = third,
+    Priority = 20,
+
+    PQueue = pqueue:new(),
+    PQueue2 = pqueue:in(Priority, FirstValue, PQueue),
+    PQueue3 = pqueue:in(Priority, SecondValue, PQueue2),
+    PQueue4 = pqueue:in(Priority, ThirdValue, PQueue3),
+    
+    {FirstValue, PQueue5} = pqueue:out(PQueue4),
+    ExpectedEmpty = false,
+    ExpectedEmpty = pqueue:is_empty(PQueue5),
+    
+    {SecondValue, PQueue6} = pqueue:out(PQueue5),
+    ExpectedEmpty2 = false,
+    ExpectedEmpty2 = pqueue:is_empty(PQueue6),
+
+    {ThirdValue, PQueue7} = pqueue:out(PQueue6),
+    ExpectedEmpty3 = true,
+    ExpectedEmpty3 = pqueue:is_empty(PQueue7).
