@@ -34,9 +34,9 @@ loop(Clock, Queue) ->
     end.
 
 log_up_to(Time, Queue) ->
-    {LowerQueue, UpperQueue} = pqueue:split(Time, Queue),
-    log_queue(LowerQueue),
-    UpperQueue.
+    {LowPriorityPQueue, HighPriorityPQueue} = pqueue:split(Time, Queue),
+    log_queue(HighPriorityPQueue),
+    LowPriorityPQueue.
 
 log_queue(Queue) ->
     case pqueue:out(Queue) of

@@ -2,10 +2,12 @@
 -export([run/0]).
 
 run() ->
+    test_split(),
     test_out_on_single_element_pqueue_returns_it_and_an_empty_pqueue(),
     test_out_returns_the_ones_with_same_priority_in_order(),
     test_out_on_empty_pqueue_returns_empty_atom_and_same_pqueue(),
-    test_out_returns_the_one_with_lowest_priority().
+    test_out_returns_the_one_with_lowest_priority(),
+    ok.
 
 test_out_on_single_element_pqueue_returns_it_and_an_empty_pqueue() ->
     Value = pepita,
@@ -46,3 +48,22 @@ test_out_returns_the_ones_with_same_priority_in_order() ->
 test_out_on_empty_pqueue_returns_empty_atom_and_same_pqueue() ->
     EmptyPQueue = pqueue:new(),
     {empty, EmptyPQueue} = pqueue:out(EmptyPQueue).
+
+test_split() ->
+    FirstValue = first,
+    SecondValue = second,
+    ThirdValue = third,
+    LowPriority = 20,
+    HighPriority = 10,
+
+    PQueue = pqueue:new(),
+    PQueue2 = pqueue:in(LowPriority, FirstValue, PQueue),
+    PQueue3 = pqueue:in(LowPriority, SecondValue, PQueue2),
+    PQueue4 = pqueue:in(LowPriority, ThirdValue, PQueue3),
+    PQueue5 = pqueue:in(HighPriority, FirstValue, PQueue4),
+    PQueue6 = pqueue:in(HighPriority, SecondValue, PQueue5),
+    PQueue7 = pqueue:in(HighPriority, ThirdValue, PQueue6),
+
+    ExpectedLowerPQueue = pqueue:in(LowPriority, ThirdValue, pqueue:in(LowPriority, SecondValue, pqueue:in(LowPriority, FirstValue, pqueue:new()))),
+    ExpectedUpperPQueue = pqueue:in(HighPriority, ThirdValue, pqueue:in(HighPriority, SecondValue, pqueue:in(HighPriority, FirstValue, pqueue:new()))),
+    {ExpectedLowerPQueue, ExpectedUpperPQueue} = pqueue:split(LowPriority, PQueue7).

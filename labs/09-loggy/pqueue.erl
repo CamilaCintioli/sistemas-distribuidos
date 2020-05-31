@@ -17,9 +17,8 @@ in(Priority, Value, PQueue) ->
 split(Priority, PQueue) ->
     dict:fold(
         fun(Key, Queue, {LowerPQueue, UpperPQueue}) ->
-            case Priority > Key of
-                true -> {LowerPQueue, in(Key, Queue, UpperPQueue)};
-                false -> {in(Key, Queue, LowerPQueue), UpperPQueue}
+            if Priority > Key -> {LowerPQueue, dict:store(Key, Queue, UpperPQueue)};
+                true -> {dict:store(Key, Queue, LowerPQueue), UpperPQueue}
             end
         end,
         {dict:new(), dict:new()},
