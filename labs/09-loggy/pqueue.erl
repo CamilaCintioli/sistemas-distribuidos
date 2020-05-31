@@ -50,7 +50,7 @@ out(PQueue) ->
 	      % retornar el elemento y la pqueue
 	      true ->
 		  {Result,
-		   dict:append(LowestPriority, LowestQueue2, PQueue2)}
+		   dict:store(LowestPriority, LowestQueue2, PQueue2)}
 	   end
     end.
 
