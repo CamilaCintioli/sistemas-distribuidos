@@ -42,5 +42,4 @@ init(Nodes) ->
 
 Al momento de realizar el log, se desencolan los mensajes seguros y efectivamente se loggean ordenados por tiempo lógico.
 
-En cuanto al modulo ```time```, implementamos el clock con una lista donde guardamos tuplas con el nombre del nodo y del tiempo actual en ese nodo. Al inicializarlo, los tiempos comienzan en 0 y son actualizados cuando reciben eventos para loggear de un worker. Llevar registro del tiempo actual de un nodo en particular nos permite saber cuando es seguro loggear un evento, y esto lo resolvemos con safe donde es seguro loggear si el tiempo dado es mayor a cada uno de el tiempo en cada nodo.
-Por ejemplo, si llega un mensaje en el tiempo 4 pero hay dos nodos con tiempos 5 y 6, ese mensaje no es seguro.
+En cuanto al modulo ```time```, implementamos el clock con una lista donde guardamos tuplas con el nombre del nodo y del tiempo actual en ese nodo. Al inicializarlo, los tiempos comienzan en 0 y son actualizados cuando reciben eventos para loggear de un worker. Llevar registro del tiempo actual de un nodo en particular nos permite saber cuando es seguro loggear un evento, y esto lo resolvemos con safe donde es seguro loggear si el tiempo dado es mayor a cada uno de los tiempos.
