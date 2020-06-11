@@ -30,15 +30,14 @@ critical(Name, Lock, Work, Gui) ->
     Lock ! {take, self()},
     receive
       taken ->
-	  T2 = erlang:system_time(micro_seconds),
-	  T = T2 - T1,
-	  io:format("~s: lock taken in ~w ms~n",
-		    [Name, T div 1000]),
-	  Gui ! taken,
-	  timer:sleep(random:uniform(Work)),
-	  Gui ! leave,
-	  Lock ! release,
-	  {taken, T}
+		T2 = erlang:system_time(micro_seconds),
+		T = T2 - T1,
+		io:format("~s: lock taken in ~w ms~n", [Name, T div 1000]),
+		Gui ! taken,
+		timer:sleep(random:uniform(Work)),
+		Gui ! leave,
+		Lock ! release,
+	  	{taken, T}
       after ?deadlock ->
 		io:format("~s: giving up~n", [Name]),
 		Lock ! release,

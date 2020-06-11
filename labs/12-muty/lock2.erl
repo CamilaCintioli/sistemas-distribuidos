@@ -4,44 +4,56 @@
 
 start(Id) -> spawn(fun () -> init(Id) end).
 
-init(_) ->
+init(Priority) ->
     receive
-      {peers, Peers} -> open(Peers);
+      {peers, Peers} -> open(Peers, Priority, []);
       stop -> ok
     end.
 
-open(Nodes) ->
+open(Nodes, Priority, Waiting) ->
     receive
       {take, Master} ->
-	  Refs = requests(Nodes), wait(Nodes, Master, Refs, []);
-      {request, From, Ref} -> From ! {ok, Ref}, open(Nodes);
+        Refs = requests(Nodes, Priority),
+        wait(Nodes, Master, Refs, Priority, Waiting);
+      {request, From, Ref, PeerPriority} ->
+        if PeerPriority < Priority -> From ! {ok, Ref};
+          true -> open(Nodes,Priority, [{From, Ref} | Waiting])
+        end,
+        open(Nodes, Priority, Waiting);
       stop -> ok
     end.
 
-requests(Nodes) ->
+requests(Nodes, Priority) ->
     lists:map(fun (P) ->
-		      R = make_ref(), P ! {request, self(), R}, R
+          R = make_ref(),
+          P ! {request, self(), R, Priority},
+          R
 	      end,
 	      Nodes).
 
-wait(Nodes, Master, [], Waiting) ->
-    Master ! taken, held(Nodes, Waiting);
-wait(Nodes, Master, Refs, Waiting) ->
+wait(Nodes, Master, [], Priority, Waiting) ->
+    Master ! taken,
+    held(Nodes, Priority, Waiting);
+wait(Nodes, Master, Refs, Priority, Waiting) ->
     receive
       {request, From, Ref} ->
-	  wait(Nodes, Master, Refs, [{From, Ref} | Waiting]);
+    	  wait(Nodes, Master, Refs, Priority, [{From, Ref} | Waiting]);
       {ok, Ref} ->
-	  Refs2 = lists:delete(Ref, Refs),
-	  wait(Nodes, Master, Refs2, Waiting);
-      release -> ok(Waiting), open(Nodes)
+        Refs2 = lists:delete(Ref, Refs),
+        wait(Nodes, Master, Refs2, Priority, Waiting);
+      release ->
+        ok(Waiting),
+        open(Nodes, Priority, [])
     end.
 
 ok(Waiting) ->
     lists:foreach(fun ({F, R}) -> F ! {ok, R} end, Waiting).
 
-held(Nodes, Waiting) ->
+held(Nodes, Priority, Waiting) ->
     receive
       {request, From, Ref} ->
-	  held(Nodes, [{From, Ref} | Waiting]);
-      release -> ok(Waiting), open(Nodes)
+	      held(Nodes, Priority, [{From, Ref} | Waiting]);
+      release ->
+        ok(Waiting),
+        open(Nodes, Priority, [])
     end.
