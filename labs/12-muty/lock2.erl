@@ -36,7 +36,7 @@ wait(Nodes, Master, [], Priority, Waiting) ->
     held(Nodes, Priority, Waiting);
 wait(Nodes, Master, Refs, Priority, Waiting) ->
     receive
-      {request, From, Ref} ->
+      {request, From, Ref, _} ->
     	  wait(Nodes, Master, Refs, Priority, [{From, Ref} | Waiting]);
       {ok, Ref} ->
         Refs2 = lists:delete(Ref, Refs),
@@ -51,7 +51,7 @@ ok(Waiting) ->
 
 held(Nodes, Priority, Waiting) ->
     receive
-      {request, From, Ref} ->
+      {request, From, Ref, _} ->
 	      held(Nodes, Priority, [{From, Ref} | Waiting]);
       release ->
         ok(Waiting),
