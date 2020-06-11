@@ -12,11 +12,9 @@ start(Lock, Sleep, Work) ->
     L3 ! {peers, [L1, L2, L4]},
     L4 ! {peers, [L1, L2, L3]},
     register(w1, worker:start("John", L1, 34, Sleep, Work)),
-    register(w2,
-	     worker:start("Ringo", L2, 37, Sleep, Work)),
+    register(w2, worker:start("Ringo", L2, 37, Sleep, Work)),
     register(w3, worker:start("Paul", L3, 43, Sleep, Work)),
-    register(w4,
-	     worker:start("George", L4, 72, Sleep, Work)),
+    register(w4, worker:start("George", L4, 72, Sleep, Work)),
     ok.
 
 stop() -> stop(w1), stop(w2), stop(w3), stop(w4).
