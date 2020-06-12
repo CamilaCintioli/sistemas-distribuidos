@@ -1,10 +1,28 @@
 # Muty
 
+## Implementado lock2 
+
+A diferencia del lock1 que es propenso a deadlocks, la implementación del `lock2` propone darle a cada uno de los locks un identificador númerico único que será usado como prioridad, con 1 siendo la más alta y N, siendo N la cantidad de locks inicializados, la más baja.
+Se puede ver la diferencia a la implementación del lock1 en la función wait que ahora recibe como parametro la prioridad del proceso lock.
+
+```erlang
+wait(Nodes, Master, Refs, Priority, Waiting) ->
+    receive
+      {request, From, Ref, PeerPriority} ->
+        if PeerPriority < Priority -> 
+          From ! {ok, Ref},
+          wait(Nodes,Master,Refs,Priority,Waiting);
+          true ->
+            wait(Nodes, Master, Refs, Priority, [{From, Ref} | Waiting])
+        end;
+```
+
+Al recibir un mensaje de request de un peer lock, se hace un chequeo de prioridades. Si la prioridad del otro lock es mayor a la de la priodad del proceso receptor, se envía inmediatamente un ok así el otro proceso puede tomar el lock. En caso contrario, no se otorga una respuesta y se guarda el receptor en la lista Waiting para poder enviar el ok luego de trabajar.
+
+
 ## Testing lock1
 
 ### Test1 (lock1, 1000, 1000)
-
-sleep 1000, work 1000
 
 ```bash
 John:   11  locks taken, average of 763.25 ms, 0 deadlock
@@ -34,8 +52,6 @@ George: 14  locks taken, average of 232.94 ms, 0 deadlock
 ## Testing lock2
 
 ### Test1 (lock2, 1000, 1000)
-
-Probamos con sleep 1000, work 1000 - notamos que el worker John tiene el lock 1 con la prioridad mas alta y esto genero los siguientes resultados:
 
 ```bash
 John:   35  locks taken, average of 362.39 ms, 0 deadlock
