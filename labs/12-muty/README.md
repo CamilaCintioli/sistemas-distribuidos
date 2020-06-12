@@ -1,6 +1,6 @@
 # Muty
 
-## Implementado lock2 
+## Implementado el lock2
 
 A diferencia del lock1 que es propenso a deadlocks, la implementación del `lock2` propone darle a cada uno de los locks un identificador númerico único que será usado como prioridad, con 1 siendo la más alta y N, siendo N la cantidad de locks inicializados, la más baja.
 Se puede ver la diferencia a la implementación del lock1 en la función wait que ahora recibe como parametro la prioridad del proceso lock.
@@ -9,7 +9,7 @@ Se puede ver la diferencia a la implementación del lock1 en la función wait qu
 wait(Nodes, Master, Refs, Priority, Waiting) ->
     receive
       {request, From, Ref, PeerPriority} ->
-        if PeerPriority < Priority -> 
+        if PeerPriority < Priority ->
           From ! {ok, Ref},
           wait(Nodes,Master,Refs,Priority,Waiting);
           true ->
@@ -19,6 +19,27 @@ wait(Nodes, Master, Refs, Priority, Waiting) ->
 
 Al recibir un mensaje de request de un peer lock, se hace un chequeo de prioridades. Si la prioridad del otro lock es mayor a la de la priodad del proceso receptor, se envía inmediatamente un ok así el otro proceso puede tomar el lock. En caso contrario, no se otorga una respuesta y se guarda el receptor en la lista Waiting para poder enviar el ok luego de trabajar.
 
+## Implementando el lock3
+
+En el lock3 estamos combinando multicast y relojes lógicos vistos en el trabajo previo de loggy. Con este algoritmo cada lock además de tener la prioridad como en la implementación del lock2, inicializan un reloj de lamport que son actualizados en cada mensaje de request que reciben.
+En cada mensaje de request, ahora se envian la prioridad y el reloj/timestamp.
+
+```erlang
+wait(Nodes, Master, Refs, Priority, Waiting, Clock) ->
+    receive
+        {request, From, Ref, PeerPriority, PeerClock} ->
+            IsLess = time:less(PeerClock, Clock),
+            IsEq = time:eq(PeerClock, Clock),
+            if IsLess or (IsEq and PeerPriority < Priority) ->
+                From ! {ok, Ref},
+                wait(Nodes, Master, Ref, Priority, Waiting, time:inc(Clock));
+            true ->
+                wait(Nodes, Master, Refs, Priority, [{From, Ref} | Waiting], time:inc(Clock))
+        end;
+```
+
+Como podemos ver en la implementación, ahora al recibir un mensaje de request primero se hace un chequeo de que el timestamp del otro proceso es menor al propio. Si este es el caso, se responde un ok inmediatamente.
+En caso de que los timestamps sean iguales, se controla la prioridad como en el lock2.
 
 ## Testing lock1
 
