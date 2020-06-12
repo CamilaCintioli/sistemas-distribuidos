@@ -93,8 +93,7 @@ George: 18  locks taken, average of 327.62 ms, 0 deadlock
 
 ## Conclusiones
 
-500,6000
-George: 7 locks taken, average of 2291.775714285714 ms, 9 deadlock
-John: 7 locks taken, average of 3265.771285714286 ms, 8 deadlock
-Paul: 7 locks taken, average of 3013.0517142857143 ms, 9 deadlock
-Ringo: 7 locks taken, average of 2816.5371428571425 ms, 10 deadlock
+- A menor tiempo de reposo, mayor cantidad de intentos de obtener el recurso compartido.
+- A mayor tiempo de trabajo, existen mas chances de producirse un `deadlock`.
+- `lock2` previene casos de `deadlock` al desempatar la obtención del recurso compartido en función de una prioridad arbitraria asignada a cada consumidor.
+- `lock3` permite una distribución mas equitativa del recurso compartido, ya que tiene en consideración la cantidad de veces que lo fué asignado a cada consumidor.
