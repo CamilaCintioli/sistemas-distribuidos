@@ -1,5 +1,5 @@
 - module(groupy_test).
-- export([start/1]).
+- export([start/1, start/2]).
 
 
 start(Groupy) ->
@@ -7,3 +7,9 @@ start(Groupy) ->
   {_,Slave1} = Groupy:start(paul, Leader),
   {_,Slave2} = Groupy:start(ringo, Leader),
   {_,Slave3} = Groupy:start(falopero, Leader).
+
+start(_Groupy, N) when N < 1 -> { error };
+start(Groupy, 1) -> Groupy:start(1);
+start(Groupy, N) -> 
+  {_, Leader} = start(Groupy, N - 1),
+  Groupy:start(N, Leader).
