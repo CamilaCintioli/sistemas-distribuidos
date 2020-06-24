@@ -23,15 +23,18 @@ init(Gms, Id, Grp) ->
   stand_by(Slave, Gui).
 
 stand_by(Member, Gui) ->
+  Self = self(),
   timer:sleep(1000),
   receive
     {join, Wrk, Peer} ->
       Member ! {join, Wrk, Peer},
       Gui ! {join, Wrk, Peer},
       stand_by(Member, Gui);
-    {view, Group} -> 
-      io:format("~w - view: ~w~n", [Member, Group]),
-      Gui ! {view, Group},
+    {view, [Self|_Group]} ->
+      Gui ! leader,
+      stand_by(Member, Gui);
+    {view, _Group} ->
+      Gui ! slave,
       stand_by(Member, Gui);
     {error, ErrorMessage} ->
       io:format("~w - error: ~w~n", [Member, ErrorMessage]),
