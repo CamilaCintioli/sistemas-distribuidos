@@ -1,7 +1,7 @@
 -module(gms3).
 -export([start/1, start/2]).
 
--define(arghh, 10).
+-define(arghh, 100).
 -define(timeout, 1000).
 
 % Inicializacion de unico nodo en un grupo sin integrantes
@@ -34,7 +34,7 @@ bcast(Id, Msg, Nodes) ->
 
 
 leader(Id, Master,N, Slaves, Group) ->
-    io:format("~w soy un leader~n",[Id]),
+    io:format("~s soy un leader~n",[Id]),
     receive
         {mcast, Msg} ->
             bcast(Id, {msg,N, Msg}, Slaves),
@@ -54,7 +54,7 @@ slave_monitor(Id, Master,Leader,N,Last, Slaves, Group) ->
     slave(Id, Master, Leader,N,Last, Slaves, Group).
 
 slave(Id, Master, Leader, N, Last, Slaves, Group) ->
-    io:format("~w soy un nuevo esclavo~n",[Id]),
+    io:format("~s soy un nuevo esclavo~n",[Id]),
     receive
         {mcast, Msg} ->
             Leader ! {mcast, Msg},
@@ -85,7 +85,7 @@ slave(Id, Master, Leader, N, Last, Slaves, Group) ->
 crash(Id) ->
   case random:uniform(?arghh) of
       ?arghh ->
-          io:format("leader ~w: crash~n", [Id]),
+          io:format("leader ~s: crash~n", [Id]),
           exit(no_luck);
       _ -> ok
   end.
@@ -96,7 +96,7 @@ election(Id, Master,N, Last, Slaves, [_|Group]) ->
     case Slaves of
         [Self|Rest] ->
             % Yo soy el nuevo lider
-            io:format("Nuevo Lider: ~w~n", [Self]),
+            io:format("Nuevo Lider: ~s~n", [Id]),
             bcast(Id, Last, Rest),
             bcast(Id, {view,N, Slaves, Group}, Rest),
             Master ! {view, Group},

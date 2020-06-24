@@ -15,23 +15,27 @@ init(Name) ->
     wxFrame:show(Frame),
     loop(Frame).
 
-loop(Frame)->
+loop(Frame) -> 
     receive
-        waiting ->
-            wxFrame:setBackgroundColour(Frame, {255, 255, 0}),
+        {join, _Wrk, _Peer} ->
+            wxFrame:setBackgroundColour(Frame, {0,0,255}),
             wxFrame:refresh(Frame),
             loop(Frame);
-        taken ->
+        {view, _Group} ->
+            wxFrame:setBackgroundColour(Frame, {0,255,0}),
+            wxFrame:refresh(Frame),
+            loop(Frame);
+        {error, _ErrorMessage} ->
             wxFrame:setBackgroundColour(Frame, ?wxRED),
             wxFrame:refresh(Frame),
             loop(Frame);
-        leave ->
-            wxFrame:setBackgroundColour(Frame, ?wxBLUE),
+        stop -> 
+            wxFrame:setBackgroundColour(Frame, {0, 0, 0}),
             wxFrame:refresh(Frame),
-            loop(Frame);
-        stop ->
+            timer:sleep(1000),
             ok;
-        Error ->
-            io:format("gui: strange message ~w ~n", [Error]),
+        _Msg ->
+            wxFrame:setBackgroundColour(Frame, {255, 255, 255}),
+            wxFrame:refresh(Frame),
             loop(Frame)
     end.
