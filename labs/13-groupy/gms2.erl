@@ -7,7 +7,7 @@
 % Inicializacion de unico nodo en un grupo sin integrantes
 start(Id) ->
     Self = self(),
-    {ok, spawn(fun()-> init(Id, Self) end)}.
+    {ok, spawn_link(fun()-> init(Id, Self) end)}.
 
 init(Id, Master) ->
     leader(Id, Master, [], [Master]).
@@ -15,7 +15,7 @@ init(Id, Master) ->
 % Unirse a grupo que ya existe.
 start(Id, Grp) ->
     Self = self(),
-    {ok, spawn(fun()-> init(Id, Grp, Self) end)}.
+    {ok, spawn_link(fun()-> init(Id, Grp, Self) end)}.
 
 init(Id, Grp, Master) ->
     Self = self(),
