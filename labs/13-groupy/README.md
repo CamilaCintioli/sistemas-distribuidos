@@ -63,16 +63,33 @@ Como podemos observar en las pruebas, la implementación de gms1, si bien permit
 
 ### GMS2
 
+Realizamos las mismas pruebas con gms2, que contiene la misma lógica del primer modulo pero permite entrar en proceso de eleccion si hay un proceso lider que crashea o es parado. Podemos verlo en las siguientes imagenes de la interfaz:
+
+Leader ! stop.
+
+![leader stopped](./test_images/gms2/1_leader_stop.png "Rendimiento sin spawn")
+
+Como podemos ver, al parar el Leader, el primer proceso es unirse como esclavo, en este caso Paul, es elegido como Leader.
+
+S2 = worker:start(gms2,”Ringo”,Leader).
+
+Ahora intentamos unir un proceso al grupo mandandole el pedido al leader que paramos y vemos como el nuevo proceso se pone en rojo, indicando que no obtuvo respuesta del lider. Este comportamiento esta definido en el siguientes lineas agregadas al inicializar un esclavo.
+
+```erlang
+after ?timeout ->
+Master ! {error, "no reply from leader"}
+```
+
+![ask to join leader](./test_images/gms2/2_join_fail.png "Rendimiento sin spawn")
+
+
 Notamos que los procesos en el grupo pueden quedar de-sincronizados si el líder crashea mientras que hace un multicast de los mensajes, ya que no todos los esclavos recibirán el último mensaje.
 También realizamos algunos experimentos mandandole a algún esclavo el mensaje `stop` y no observamos problemas, ya que de ser así simplemente no participará en la sincronización del grupo al no poder recibir ni enviar mensajes.
 
-
 ### GMS3
 
-Realizamos las mismas pruebas con gms3 y pudimos observar la correcta coordinación de los procesos dentro del grupo, pudiendo hacer una elección del lider
+Realizamos las mismas pruebas con gms3 y pudimos observar la correcta coordinación de los procesos dentro del grupo, pudiendo hacer una elección del lider manteniendo referencias del último numero de mensaje y el último mensaje recibido.
 
 ## Conclusiones
 
 Para handlear el problema donde los mensajes se pueden perder, nos parece que una solución posible es enviar una referencia junto al mensaje y esperar que el receptor nos envíe una respuesta con la misma referencia. El impacto de la performance es relativo al tiempo de trasmisión de los mensajes entre emisor y receptor. 
-
-moreno 133328 entre french y balcarce quilmes
