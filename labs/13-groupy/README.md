@@ -44,14 +44,22 @@ El worker cuenta con una gui, similar a la utilizada en Muty, para mostrar el es
 
 ### GMS1
 
-probamos levantando un lider, con dos procesos esclavos. El comportamiento es el esperado.
-Como era de esperar, si el lider crashea, los esclavos quedan sin enterarse y no pueden entrar nodos nuevos.
-
+Leader = worker:start(gms1,"john").
 ![leader](./test_images/gms1/1_leader.png "leader")
+
+S1 = worker:start(gms1,”Paul”,Leader).
+
 ![ask to join](./test_images/gms1/2_ask_to_join.png "Rendimiento sin spawn")
-![joined](./test_images/gms1/3_joined.png "Rendimiento sin spawn")
+
+Leader ! stop.
+
 ![stopped](./test_images/gms1/4_stopped.png "Rendimiento sin spawn")
-![ask to join slave](./test_images/gms1/6_ask_to_join_slave.png "Rendimiento sin spawn")
+
+S2 = worker:start(gs1,”Ringo”,Leader).
+![ask to join slave](./test_images/gms1/5_ask_to_join.png "Rendimiento sin spawn")
+
+
+Como podemos observar en las pruebas, la implementación de gms1, si bien permite que si hay un lider, otros esclavos puedan unirse al grupo, una vez que el lider crashea o simplemente se para, el grupo deja de funcionar independientemente si el procesos a unirse le manda el mensaje al lider o a un nodo perteneciente al grupo.
 
 ### GMS2
 
@@ -66,3 +74,5 @@ Realizamos las mismas pruebas con gms3 y pudimos observar la correcta coordinaci
 ## Conclusiones
 
 Para handlear el problema donde los mensajes se pueden perder, nos parece que una solución posible es enviar una referencia junto al mensaje y esperar que el receptor nos envíe una respuesta con la misma referencia. El impacto de la performance es relativo al tiempo de trasmisión de los mensajes entre emisor y receptor. 
+
+moreno 133328 entre french y balcarce quilmes
