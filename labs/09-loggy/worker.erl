@@ -46,4 +46,3 @@ select(Peers) ->
     
 jitter(0) -> ok;
 jitter(Jitter) -> timer:sleep(random:uniform(Jitter)).
-    
