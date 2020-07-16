@@ -27,7 +27,7 @@ collect(N, Workers, Peers) ->
   end.
   
 run(Workers, Peers) ->
-  Color = {255,255,255},
+  Color = {0,0,0},
   lists:foreach(
     fun(W) ->
       W ! {state, Color, Peers}

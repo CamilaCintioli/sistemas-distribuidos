@@ -6,7 +6,6 @@
 start(Id, Master, Seed, Jitter) ->
   spawn(fun() -> init(Id, Master, Seed, Jitter) end).
 
-%Se cambio el seed. Id, Id, Id  =>>  Seed,Seed,Seed.
 init(Id, Master, Seed, Jitter) ->
   random:seed(Seed, Seed, Seed),
   receive
