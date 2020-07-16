@@ -1,25 +1,40 @@
 -module(gui).
 
--export([init/1, start/1]).
+-export([start/1]).
+
+-define(width, 200).
+-define(height, 200).
 
 -include_lib("wx/include/wx.hrl").
 
-start(Name) -> spawn(gui, init, [Name]).
+start(Id) ->
+  spawn_link(fun() -> init(Id) end).
 
 init(Name) ->
-    Width = 200,
-    Height = 200,
-    Server =
-    wx:new(), %Server will be the parent for the Frame
-    Frame = wxFrame:new(Server, -1, Name,
-            [{size, {Width, Height}}]),
-    wxFrame:show(Frame),
-    loop(Frame).
+  Width = 200,
+  Height = 200,
+  Server = wx:new(), %Server will be the parent for the Frame
+  Frame = wxFrame:new(Server, -1, Name, [{size,{Width, Height}}]),
+  wxFrame:setBackgroundColour(Frame, ?wxBLACK),  
+  wxFrame:show(Frame),
+  wxFrame:connect(Frame, close_window),
+  loop(Frame).
 
-loop(Frame) ->
-    receive
-      _Msg ->
-        wxFrame:setBackgroundColour(Frame, {255, 255, 255}),
-        wxFrame:refresh(Frame),
-        loop(Frame)
-    end.
+loop(Frame)->
+  receive
+    #wx{event=#wxClose{}} ->
+      wxWindow:destroy(Frame),
+      ok;
+    {color, Color} ->
+      color(Frame, Color),
+      loop(Frame);
+    stop ->
+      ok;
+    Error ->
+      io:format("gui: strange message ~w ~n", [Error]),
+      loop(Frame)
+  end.
+
+color(Frame, Color) ->
+  wxFrame:setBackgroundColour(Frame, Color),
+  wxFrame:refresh(Frame).

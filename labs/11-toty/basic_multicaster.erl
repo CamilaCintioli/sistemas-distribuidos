@@ -1,23 +1,42 @@
 -module(basic_multicaster).
 
--export([start/1]).
+-export([start/4]).
 
--define(default_jitter, 1000).
+%Id, self(), Seed, Jitter
+start(Id, Master, Seed, Jitter) ->
+  spawn(fun() -> init(Id, Master, Seed, Jitter) end).
 
-start(Peers) -> {ok, spawn(fun () -> init(Peers) end)}.
+%Se cambio el seed. Id, Id, Id  =>>  Seed,Seed,Seed.
+init(Id, Master, Seed, Jitter) ->
+  random:seed(Seed, Seed, Seed),
+  receive
+  {peers, Nodes} ->
+    server(Id, Master, Nodes, Jitter)
+  end.
+    
+server(Id, Master, Nodes, Jitter) ->
+  receive
+    {send, Msg} ->
+      multicast(Msg, Nodes, Jitter),
+      server(Id, Master, Nodes, Jitter);
+    {multicast, _From, Msg} ->
+      Master ! {deliver, Msg},
+      server(Id, Master, Nodes, Jitter);
+    stop ->
+      ok
+  end.
 
-init(Peers) -> server(Peers).
+multicast(Msg, Nodes, 0) ->
+  Self = self(),
+  lists:foreach(fun(Node) ->
+    Node ! {multicast, Self, Msg}
+    end,
+    Nodes);
 
-server(Peers) ->
-    receive
-      {send, Msg} -> mcast(Msg, Peers), server(Peers)
-    end.
-
-mcast(Msg, Peers) ->
-    lists:foreach(fun (Peer) -> jitter(), Peer ! Msg end,
-		  Peers).
-
-jitter() -> jitter(?default_jitter).
-
-jitter(0) -> ok;
-jitter(Jitter) -> timer:sleep(random:uniform(Jitter)).
+multicast(Msg, Nodes, Jitter) ->
+  Self = self(),
+  lists:foreach(fun(Node) ->
+    timer:sleep(random:uniform(Jitter)),
+    Node ! {multicast, Self, Msg}
+    end,
+    Nodes).
