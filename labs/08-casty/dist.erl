@@ -27,8 +27,7 @@ loop(Clients, N, Context) ->
       loop([{Ref, From}|Clients], N, Context);
   {'DOWN', Ref, process, Pid, _} ->
         io:format("dist: client down ~w~n", [Pid]),
-        {_, _, NewClients} = lists:keytake(Ref,1,Clients),
-      loop(NewClients, N, Context);
+        loop(lists:keydelete(Ref,1,Clients), N, Context);
   stop ->
       io:format("dist: received stop message~n", []),
       ok;
