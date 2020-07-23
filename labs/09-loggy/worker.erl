@@ -4,8 +4,8 @@
 
 start(Name, Logger, Seed, Sleep, Jitter) ->
     spawn_link(fun () ->
-		       init(Name, Logger, Seed, Sleep, Jitter)
-	       end).
+           init(Name, Logger, Seed, Sleep, Jitter)
+         end).
 
 stop(Worker) -> Worker ! stop.
 

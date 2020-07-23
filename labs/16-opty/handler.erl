@@ -3,7 +3,7 @@
 
 start(Client, Validator, Store) ->
     spawn_link(fun () -> init(Client, Validator, Store)
-	       end).
+         end).
 
 init(Client, Validator, Store) ->
     handler(Client, Validator, Store, [], []).

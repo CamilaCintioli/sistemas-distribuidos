@@ -8,11 +8,11 @@ init() -> validator().
 validator() ->
     receive 
       {validate, Ref, Reads, Writes, Client} ->
-	  case validate(Reads) of
-	    ok -> update(Writes), Client ! {Ref, ok};
-	    abort -> Client ! {Ref, abort}
-	  end,
-	  validator();
+    case validate(Reads) of
+      ok -> update(Writes), Client ! {Ref, ok};
+      abort -> Client ! {Ref, abort}
+    end,
+    validator();
       _Old -> validator()
     end.
 
@@ -24,18 +24,18 @@ send_checks(Reads) ->
     Self = self(),
     N = length(Reads),
     lists:map(fun ({Entry, Time}) ->
-		      Entry ! {check, Tag, Time, Self}
-	      end,
-	      Reads),
+          Entry ! {check, Tag, Time, Self}
+        end,
+        Reads),
     {N, Tag}.
 
 check_reads(N, Tag) ->
     if N == 0 -> ok;
        true ->
-	   receive
-	     {Tag, ok} -> check_reads(N - 1, Tag);
-	     {Tag, abort} -> abort
-	   end
+     receive
+       {Tag, ok} -> check_reads(N - 1, Tag);
+       {Tag, abort} -> abort
+     end
     end.
 
 update(Writes) -> 

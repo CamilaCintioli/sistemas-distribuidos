@@ -26,8 +26,8 @@ requests(Nodes) ->
           R = make_ref(),
           P ! {request, self(), R},
           R
-	      end,
-	      Nodes).
+        end,
+        Nodes).
 
 wait(Nodes, Master, [], Waiting) ->
     Master ! taken,
@@ -35,7 +35,7 @@ wait(Nodes, Master, [], Waiting) ->
 wait(Nodes, Master, Refs, Waiting) ->
     receive
       {request, From, Ref} ->
-	      wait(Nodes, Master, Refs, [{From, Ref} | Waiting]);
+        wait(Nodes, Master, Refs, [{From, Ref} | Waiting]);
       {ok, Ref} ->
         Refs2 = lists:delete(Ref, Refs),
         wait(Nodes, Master, Refs2, Waiting);
@@ -48,6 +48,6 @@ ok(Waiting) ->
 held(Nodes, Waiting) ->
     receive
       {request, From, Ref} ->
-	      held(Nodes, [{From, Ref} | Waiting]);
+        held(Nodes, [{From, Ref} | Waiting]);
       release -> ok(Waiting), open(Nodes)
     end.

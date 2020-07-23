@@ -14,7 +14,7 @@ init(ProducerPid) ->
 consume(M,Monitor) ->
     receive
       {ping, M} ->
-	  io:format("El valor esperado es ~w~n", [M]),
+    io:format("El valor esperado es ~w~n", [M]),
       consume(M+1,Monitor);
       {ping, N} when N>M -> io:format("Warning~n", []),
       consume(N+1,Monitor);

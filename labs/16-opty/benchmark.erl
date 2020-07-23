@@ -59,7 +59,7 @@ init_client(Reporter, Server, ReadCount, WriteCount, MaxPosition) ->
 client(Server, ReadCount, WriteCount, MaxPosition) ->
     Handler = server:open(Server),
     Operations = make_operations(ReadCount, WriteCount,
-				 MaxPosition),
+         MaxPosition),
     client(Handler, Operations).
 
 client(Handler, []) -> client:commit(Handler);
@@ -73,12 +73,12 @@ client(Handler,
 
 make_operations(ReadCount, WriteCount, MaxPosition) ->
     shuffle:list(reads(ReadCount, MaxPosition) ++
-		   writes(WriteCount, MaxPosition)).
+       writes(WriteCount, MaxPosition)).
 
 reads(0, _MaxPosition) -> [];
 reads(N, MaxPosition) ->
     [{read, 1 + trunc(rand:uniform() * MaxPosition)} | reads(N - 1,
-						  MaxPosition)].
+              MaxPosition)].
 
 writes(0, _MaxPosition) -> [];
 writes(N, MaxPosition) ->

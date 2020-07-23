@@ -6,7 +6,7 @@
 
 start(Name, Lock, Seed, Sleep, Work) ->
     spawn(fun () -> init(Name, Lock, Seed, Sleep, Work)
-	  end).
+    end).
 
 init(Name, Lock, Seed, Sleep, Work) ->
     Gui = spawn(gui, init, [Name]),
@@ -20,8 +20,8 @@ worker(Name, Lock, Taken, Sleep, Work, Gui) ->
     receive
       stop -> Taken
       after Wait ->
-		T = critical(Name, Lock, Work, Gui),
-		worker(Name, Lock, [T | Taken], Sleep, Work, Gui)
+    T = critical(Name, Lock, Work, Gui),
+    worker(Name, Lock, [T | Taken], Sleep, Work, Gui)
     end.
 
 critical(Name, Lock, Work, Gui) ->
@@ -30,33 +30,33 @@ critical(Name, Lock, Work, Gui) ->
     Lock ! {take, self()},
     receive
       taken ->
-		T2 = erlang:system_time(micro_seconds),
-		T = T2 - T1,
-		io:format("~s: lock taken in ~w ms~n", [Name, T div 1000]),
-		Gui ! taken,
-		timer:sleep(random:uniform(Work)),
-		Gui ! leave,
-		Lock ! release,
-	  	{taken, T}
+    T2 = erlang:system_time(micro_seconds),
+    T = T2 - T1,
+    io:format("~s: lock taken in ~w ms~n", [Name, T div 1000]),
+    Gui ! taken,
+    timer:sleep(random:uniform(Work)),
+    Gui ! leave,
+    Lock ! release,
+      {taken, T}
       after ?deadlock ->
-		io:format("~s: giving up~n", [Name]),
-		Lock ! release,
-		Gui ! leave,
-		no
+    io:format("~s: giving up~n", [Name]),
+    Lock ! release,
+    Gui ! leave,
+    no
     end.
 
 terminate(Name, Taken) ->
     {Locks, Time, Dead} = lists:foldl(fun (Entry,
-					   {L, T, D}) ->
-					      case Entry of
-						{taken, I} -> {L + 1, T + I, D};
-						_ -> {L, T, D + 1}
-					      end
-				      end,
-				      {0, 0, 0}, Taken),
+             {L, T, D}) ->
+                case Entry of
+            {taken, I} -> {L + 1, T + I, D};
+            _ -> {L, T, D + 1}
+                end
+              end,
+              {0, 0, 0}, Taken),
     if Locks > 0 -> Average = Time / Locks;
        true -> Average = 0
     end,
     io:format("~s: ~w locks taken, average of ~w ms, "
-	      "~w deadlock~n",
-	      [Name, Locks, Average / 1000, Dead]).
+        "~w deadlock~n",
+        [Name, Locks, Average / 1000, Dead]).

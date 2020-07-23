@@ -25,8 +25,8 @@ requests(Nodes, Priority) ->
           R = make_ref(),
           P ! {request, self(), R, Priority},
           R
-	      end,
-	      Nodes).
+        end,
+        Nodes).
 
 wait(Nodes, Master, [], Priority, Waiting) ->
     Master ! taken,
@@ -53,7 +53,7 @@ ok(Waiting) ->
 held(Nodes, Priority, Waiting) ->
     receive
       {request, From, Ref, _} ->
-	      held(Nodes, Priority, [{From, Ref} | Waiting]);
+        held(Nodes, Priority, [{From, Ref} | Waiting]);
       release ->
         ok(Waiting),
         open(Nodes, Priority, [])
