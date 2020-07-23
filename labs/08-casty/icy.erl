@@ -52,7 +52,7 @@ padding(Meta) ->
 
 reply(Bin) ->
     case read_line(Bin) of
-  {ok, "ICY 200 OK", R1} ->
+    {ok, "HTTP/1.0 200 OK", R1} ->
       case header(R1, []) of
     {ok, Header, R2} ->
         %% io:format("icy: header ~w~n", [Header]),
