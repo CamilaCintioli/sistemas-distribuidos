@@ -46,11 +46,9 @@ stress(M, Proxy) ->
         stress(N-1, Proxy)
     end.
 
-
 dist() ->
     Proxy = spawn(proxy, init, [?Cast]),
     register(icy, spawn(dist, init, [Proxy])).
-
 
 root() ->
     Proxy = spawn(proxy, init, [?Cast]),
@@ -63,11 +61,3 @@ branch(Port) ->
 branch(Proxy, Port) ->
     Branch = spawn(branch, init, [Proxy]),
     spawn(client, init, [Branch, Port]).
-
-leaf() ->
-    Branch = spawn(branch, init, [icy]),
-    spawn(dummy, init, [Branch]).
-
-leaf(Proxy) ->
-    Branch = spawn(branch, init, [Proxy]),
-    spawn(dummy, init, [Branch]).
